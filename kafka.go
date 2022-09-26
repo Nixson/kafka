@@ -6,13 +6,16 @@ import (
 	"github.com/Nixson/logNx"
 	kfk "github.com/segmentio/kafka-go"
 	"strings"
-	"time"
 )
 
+type ListenerAll func([]byte, *kfk.Message) error
 type Listener func([]byte) error
 
 func Listen(listener Listener, topic, group string) {
 	go runListener(listener, topic, group)
+}
+func ListenAll(listener ListenerAll, topic, group string) {
+	go runListenerAll(listener, topic, group)
 }
 
 func Send(topicName string, message []byte) error {
@@ -27,7 +30,26 @@ func Send(topicName string, message []byte) error {
 	}
 	return nil
 }
+func runListenerAll(listener ListenerAll, kafkaTopic, kafkaGroup string) {
+	env := environment.GetEnv()
+	reader := getReader(env.Get("kafka.url"), kafkaTopic, kafkaGroup)
+	defer reader.Close()
 
+	ctx := context.Background()
+	for {
+		m, err := reader.ReadMessage(ctx)
+		if err != nil {
+			logNx.Get().Error(err.Error())
+			continue
+		}
+
+		err = listener(m.Value, &m)
+		if err != nil {
+			logNx.Get().Error(err.Error())
+			continue
+		}
+	}
+}
 func runListener(listener Listener, kafkaTopic, kafkaGroup string) {
 	env := environment.GetEnv()
 	reader := getReader(env.Get("kafka.url"), kafkaTopic, kafkaGroup)
@@ -53,12 +75,12 @@ func getReader(kafkaURL, kafkaTopic, kafkaGroup string) *kfk.Reader {
 	env := environment.GetEnv()
 	brokers := strings.Split(kafkaURL, ",")
 	return kfk.NewReader(kfk.ReaderConfig{
-		Brokers:        brokers,
-		GroupID:        kafkaGroup,
-		Topic:          kafkaTopic,
-		MinBytes:       env.GetInt("kafka.minBytes"),
-		MaxBytes:       env.GetInt("kafka.maxBytes"),
-		CommitInterval: time.Second * time.Duration(env.GetInt("kafka.interval")),
+		Brokers:  brokers,
+		GroupID:  kafkaGroup,
+		Topic:    kafkaTopic,
+		MinBytes: env.GetInt("kafka.minBytes"),
+		MaxBytes: env.GetInt("kafka.maxBytes"),
+		//CommitInterval: time.Millisecond * time.Duration(env.GetInt("kafka.interval")),
 	})
 }
 
