@@ -39,13 +39,13 @@ func runListenerAll(listener ListenerAll, kafkaTopic, kafkaGroup string) {
 	for {
 		m, err := reader.ReadMessage(ctx)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Println(err.Error())
 			continue
 		}
 
 		err = listener(m.Value, &m)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Println(err.Error())
 			continue
 		}
 	}
@@ -59,13 +59,13 @@ func runListener(listener Listener, kafkaTopic, kafkaGroup string) {
 	for {
 		m, err := reader.ReadMessage(ctx)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Println(err.Error())
 			continue
 		}
 
 		err = listener(m.Value)
 		if err != nil {
-			logger.Error(err.Error())
+			logger.Println(err.Error())
 			continue
 		}
 	}
