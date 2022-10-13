@@ -3,7 +3,7 @@ package kafka
 import (
 	"context"
 	"github.com/Nixson/environment"
-	"github.com/Nixson/logNx"
+	"github.com/Nixson/logger"
 	kfk "github.com/segmentio/kafka-go"
 	"strings"
 )
@@ -39,13 +39,13 @@ func runListenerAll(listener ListenerAll, kafkaTopic, kafkaGroup string) {
 	for {
 		m, err := reader.ReadMessage(ctx)
 		if err != nil {
-			logNx.Get().Error(err.Error())
+			logger.Error(err.Error())
 			continue
 		}
 
 		err = listener(m.Value, &m)
 		if err != nil {
-			logNx.Get().Error(err.Error())
+			logger.Error(err.Error())
 			continue
 		}
 	}
@@ -59,13 +59,13 @@ func runListener(listener Listener, kafkaTopic, kafkaGroup string) {
 	for {
 		m, err := reader.ReadMessage(ctx)
 		if err != nil {
-			logNx.Get().Error(err.Error())
+			logger.Error(err.Error())
 			continue
 		}
 
 		err = listener(m.Value)
 		if err != nil {
-			logNx.Get().Error(err.Error())
+			logger.Error(err.Error())
 			continue
 		}
 	}

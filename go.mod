@@ -3,8 +3,8 @@ module github.com/Nixson/kafka
 go 1.19
 
 require (
-	github.com/Nixson/environment v0.0.16
-	github.com/Nixson/logNx v0.0.2
+	github.com/Nixson/environment v0.0.17
+	github.com/Nixson/logger v0.0.1
 	github.com/segmentio/kafka-go v0.4.35
 )
 
